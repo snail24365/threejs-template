@@ -2,6 +2,7 @@ import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "lil-gui";
+import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
 
 // const gui = new dat.GUI({ width: 340 })
 
@@ -24,6 +25,10 @@ const controls = new OrbitControls(camera, canvas);
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
 });
+
+scene.add(
+  new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ color: 0x005500 }))
+);
 
 (function () {
   window.addEventListener("resize", () => {
