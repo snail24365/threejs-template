@@ -1,60 +1,56 @@
 import "./style.css";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import {
+    OrbitControls
+} from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "lil-gui";
-import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
+import {
+    AmbientLight,
+    BoxGeometry,
+    DirectionalLight,
+    Mesh,
+    MeshPhongMaterial,
+    Vector3
+} from "three";
 
 // const gui = new dat.GUI({ width: 340 })
+const cameraSetting = [75, window.innerWidth / window.innerHeight, 0.1, 100]
 
-const canvas = document.querySelector("canvas.webgl");
+// 필수 요소 (캔버스, Scene, Camera, Renderer)
+const canvas = document.querySelector(".myCanvas");
 const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(...cameraSetting);
+const renderer = new THREE.WebGLRenderer({ canvas });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
-
-const clock = new THREE.Clock();
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
+// 보조 (마우스 컨트롤러)
 const controls = new OrbitControls(camera, canvas);
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-});
+controls.enableDamping = true;
 
-scene.add(
-  new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ color: 0x005500 }))
-);
 
-(function () {
-  window.addEventListener("resize", () => {
-    sizes.width = window.innerWidth;
-    sizes.height = window.innerHeight;
 
-    camera.aspect = sizes.width / sizes.height;
-    camera.updateProjectionMatrix();
 
-    renderer.setSize(sizes.width, sizes.height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  });
+// Scene 구성 + 카메라 위치 잡기
+const box = new Mesh(new BoxGeometry(1, 1, 1), new MeshPhongMaterial({
+    color: 0x005500
+}));
+scene.add(box);
 
-  camera.position.set(0, 0, 1);
-  scene.add(camera);
-  controls.enableDamping = true;
+const directionLight = new DirectionalLight("#ffffff", 1);
+directionLight.position.copy(new Vector3(1,2,3))
+scene.add(directionLight);
 
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-})();
+const ambientLight = new AmbientLight("#ffffff", 0.5);
+scene.add(ambientLight);
 
+camera.position.set(1, 1, 2);
+
+// 매프레임마다 렌더
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
-  controls.update();
-  renderer.render(scene, camera);
-  renderer.setAnimationLoop(tick);
+    controls.update();
+    renderer.render(scene, camera);
+    renderer.setAnimationLoop(tick); // 재귀함수로 tick 재호출함
 };
 
 tick();
